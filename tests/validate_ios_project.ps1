@@ -4,7 +4,8 @@ $requiredFiles = @(
     'project.yml', 'TongShang\Info.plist', 'TongShang\TongShangApp.swift',
     'TongShang\Resources\products.json', 'TongShang\Resources\Viewer\index.html',
     'TongShang\Resources\Viewer\viewer.bundle.js', 'TongShangTests\ProductTests.swift',
-    '.github\workflows\ios.yml', 'scripts\install-apple-prerequisites.ps1'
+    '.github\workflows\ios.yml', 'scripts\install-apple-prerequisites.ps1',
+    'scripts\run-apple-prerequisite-installer.cmd'
 )
 foreach ($relative in $requiredFiles) {
     if (-not (Test-Path -LiteralPath (Join-Path $root $relative) -PathType Leaf)) { throw "缺少 iOS 工程文件：$relative" }
@@ -39,6 +40,11 @@ if (-not $scanner.Contains('DataScannerViewController') -or -not $scanner.Contai
 $workflow = Get-Content -Raw -Encoding UTF8 (Join-Path $root '.github\workflows\ios.yml')
 foreach ($required in @('runs-on: macos-15', 'xcodegen generate', 'xcodebuild', 'CODE_SIGNING_ALLOWED=NO')) {
     if (-not $workflow.Contains($required)) { throw "iOS 云构建工作流缺少：$required" }
+}
+
+$launcher = Get-Content -Raw -Encoding UTF8 (Join-Path $root 'scripts\run-apple-prerequisite-installer.cmd')
+foreach ($required in @('fltmc', '-Verb RunAs', 'install-apple-prerequisites.ps1', 'E:\iTunes', 'E:\iCloud')) {
+    if (-not $launcher.Contains($required)) { throw "Apple 安装启动器缺少：$required" }
 }
 
 Write-Output "iOS project validation passed ($($manifest.products.Count) products, $($manifest.products.Count * 2) 3D/AR assets)."
