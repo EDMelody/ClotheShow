@@ -26,7 +26,9 @@ $logDirectory = Join-Path $ICloudRoot 'InstallLogs'
 New-Item -ItemType Directory -Force -Path $logDirectory | Out-Null
 
 $packages = @(
+    @{ Name = 'Apple Application Support 32-bit'; Msi = Join-Path $icloudInstaller 'AppleApplicationSupport.msi'; Properties = @("INSTALLDIR=$ICloudRoot\Apple Application Support (32-bit)") },
     @{ Name = 'Apple Application Support 64-bit'; Msi = Join-Path $icloudInstaller 'AppleApplicationSupport64.msi'; Properties = @("INSTALLDIR=$ICloudRoot\Apple Application Support (64-bit)") },
+    @{ Name = 'Bonjour 32-bit'; Msi = Join-Path $icloudInstaller 'Bonjour.msi'; Properties = @("INSTALLDIR=$ICloudRoot\Bonjour (32-bit)") },
     @{ Name = 'Bonjour 64-bit'; Msi = Join-Path $icloudInstaller 'Bonjour64.msi'; Properties = @("INSTALLDIR=$ICloudRoot\Bonjour", "INSTALLDIR64=$ICloudRoot\Bonjour") },
     @{ Name = 'Apple Software Update'; Msi = Join-Path $icloudInstaller 'AppleSoftwareUpdate.msi'; Properties = @("INSTALLDIR=$ICloudRoot\Apple Software Update") },
     @{ Name = 'Apple Mobile Device Support'; Msi = Join-Path $itunesInstaller 'AppleMobileDeviceSupport64.msi'; Properties = @("INSTALLDIR=$ITunesRoot\Mobile Device Support", "INSTALLDIR32=$ITunesRoot\Mobile Device Support (32-bit)") },
@@ -55,6 +57,10 @@ foreach ($package in $packages) {
     $results += $result
     $results | ConvertTo-Json | Set-Content -LiteralPath (Join-Path $logDirectory 'summary.json') -Encoding UTF8
     if ($process.ExitCode -notin @(0, 1638, 3010)) {
+        $pendingRename = Get-ItemProperty -LiteralPath 'HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager' -Name PendingFileRenameOperations -ErrorAction SilentlyContinue
+        if ($package.Name -eq 'iCloud' -and $process.ExitCode -eq 1603 -and $null -ne $pendingRename) {
+            throw "Installation failed: iCloud, exit code 1603. Windows has pending file operations; restart Windows and run this installer again. See $log"
+        }
         throw "Installation failed: $($package.Name), exit code $($process.ExitCode). See $log"
     }
     Write-Host "Completed $($package.Name) (exit code $($process.ExitCode))."
