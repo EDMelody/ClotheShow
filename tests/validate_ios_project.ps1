@@ -3,7 +3,8 @@ $root = Split-Path -Parent $PSScriptRoot
 $requiredFiles = @(
     'project.yml', 'TongShang\Info.plist', 'TongShang\TongShangApp.swift',
     'TongShang\Resources\products.json', 'TongShang\Resources\Viewer\index.html',
-    'TongShang\Resources\Viewer\viewer.bundle.js', 'TongShangTests\ProductTests.swift'
+    'TongShang\Resources\Viewer\viewer.bundle.js', 'TongShangTests\ProductTests.swift',
+    '.github\workflows\ios.yml'
 )
 foreach ($relative in $requiredFiles) {
     if (-not (Test-Path -LiteralPath (Join-Path $root $relative) -PathType Leaf)) { throw "缺少 iOS 工程文件：$relative" }
@@ -34,5 +35,10 @@ if (-not $viewerSource.Contains("/^file:/i") -or -not $viewerSource.Contains('pr
 
 $scanner = Get-Content -Raw -Encoding UTF8 (Join-Path $root 'TongShang\Scanner\ScannerScreen.swift')
 if (-not $scanner.Contains('DataScannerViewController') -or -not $scanner.Contains('SKUResolver')) { throw '扫码模块未接入 VisionKit 或 SKU Resolver。' }
+
+$workflow = Get-Content -Raw -Encoding UTF8 (Join-Path $root '.github\workflows\ios.yml')
+foreach ($required in @('runs-on: macos-15', 'xcodegen generate', 'xcodebuild', 'CODE_SIGNING_ALLOWED=NO')) {
+    if (-not $workflow.Contains($required)) { throw "iOS 云构建工作流缺少：$required" }
+}
 
 Write-Output "iOS project validation passed ($($manifest.products.Count) products, $($manifest.products.Count * 2) 3D/AR assets)."

@@ -21,6 +21,10 @@
 4. 用数据线连接 iPhone，解锁并信任电脑；在 Xcode 顶部选择该 iPhone，点击 Run。
 5. 免费 Apple ID 签名通常需在手机的“设置 → 通用 → VPN 与设备管理”中信任开发者，且构建有效期有限；付费开发者账号可用于 TestFlight 或正式分发。
 
+### 先用 GitHub 云端验证构建
+
+仓库包含 `.github/workflows/ios.yml`。将代码推送到 GitHub 后，打开仓库的 **Actions → iOS Build → Run workflow**。该步骤使用 GitHub 的 macOS 15 + Xcode 16.4 环境生成工程、编译并运行单元测试，不需要 Apple 签名。构建通过后，再配置证书和 provisioning profile 生成真机 IPA。
+
 ## 构建与验证
 
 ```powershell
