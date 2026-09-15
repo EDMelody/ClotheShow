@@ -47,4 +47,9 @@ foreach ($required in @('fltmc', '-Verb RunAs', 'install-apple-prerequisites.ps1
     if (-not $launcher.Contains($required)) { throw "Apple 安装启动器缺少：$required" }
 }
 
+$appleInstaller = Get-Content -Raw -Encoding UTF8 (Join-Path $root 'scripts\install-apple-prerequisites.ps1')
+foreach ($required in @('ConvertTo-MsiArgument', "-ArgumentList (`$arguments -join ' ')", 'Write-Host "Installing')) {
+    if (-not $appleInstaller.Contains($required)) { throw "Apple 安装脚本缺少安全参数处理或进度提示：$required" }
+}
+
 Write-Output "iOS project validation passed ($($manifest.products.Count) products, $($manifest.products.Count * 2) 3D/AR assets)."

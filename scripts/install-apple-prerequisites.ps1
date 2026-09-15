@@ -5,6 +5,16 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
+
+function ConvertTo-MsiArgument {
+    param([Parameter(Mandatory)][string]$Value)
+
+    if ($Value -match '^(?<name>[^=\s]+)=(?<data>.*)$') {
+        return '{0}="{1}"' -f $Matches.name, ($Matches.data -replace '"', '\"')
+    }
+    return '"{0}"' -f ($Value -replace '"', '\"')
+}
+
 $principal = [Security.Principal.WindowsPrincipal]::new([Security.Principal.WindowsIdentity]::GetCurrent())
 if (-not $principal.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
     throw 'This installer must run as Administrator.'
@@ -26,6 +36,7 @@ $packages = @(
 
 $results = @()
 foreach ($package in $packages) {
+    Write-Host "Checking Apple signature: $($package.Name)..."
     if (-not (Test-Path -LiteralPath $package.Msi -PathType Leaf)) {
         throw "Missing signed Apple package: $($package.Msi)"
     }
@@ -35,14 +46,18 @@ foreach ($package in $packages) {
     }
     $safeName = $package.Name -replace '[^A-Za-z0-9]+', '-'
     $log = Join-Path $logDirectory "$safeName.log"
-    $arguments = @('/i', $package.Msi) + $package.Properties + @('IAcceptLicense=Yes', '/qn', '/norestart', '/L*v', $log)
-    $process = Start-Process -FilePath 'msiexec.exe' -ArgumentList $arguments -Wait -PassThru -WindowStyle Hidden
+    $arguments = @('/i', (ConvertTo-MsiArgument $package.Msi))
+    $arguments += $package.Properties | ForEach-Object { ConvertTo-MsiArgument $_ }
+    $arguments += @('IAcceptLicense=Yes', '/qn', '/norestart', '/L*v', (ConvertTo-MsiArgument $log))
+    Write-Host "Installing $($package.Name)..."
+    $process = Start-Process -FilePath 'msiexec.exe' -ArgumentList ($arguments -join ' ') -Wait -PassThru
     $result = [PSCustomObject]@{ Component = $package.Name; ExitCode = $process.ExitCode; Log = $log }
     $results += $result
     $results | ConvertTo-Json | Set-Content -LiteralPath (Join-Path $logDirectory 'summary.json') -Encoding UTF8
     if ($process.ExitCode -notin @(0, 1638, 3010)) {
         throw "Installation failed: $($package.Name), exit code $($process.ExitCode). See $log"
     }
+    Write-Host "Completed $($package.Name) (exit code $($process.ExitCode))."
 }
 
 $results | Format-Table -AutoSize
