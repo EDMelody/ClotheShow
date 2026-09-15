@@ -26,8 +26,14 @@ foreach ($item in $requiredContent) {
     }
 }
 
-if ($content -match '<script\s+src=' -or $content -match '<link\s+[^>]*href=') {
+if ($content -match '<script\s+[^>]*src=["'']https?://' -or $content -match '<link\s+[^>]*href=["'']https?://') {
     throw 'HTML Demo 不应依赖外部脚本或样式。'
+}
+
+foreach ($pwaFile in @('manifest.webmanifest', 'service-worker.js', 'icons\icon-180.png', 'icons\icon-512.png')) {
+    if (-not (Test-Path -LiteralPath (Join-Path (Split-Path $demoPath) $pwaFile))) {
+        throw "HTML Demo 缺少 PWA 文件：$pwaFile"
+    }
 }
 
 $productCount = ([regex]::Matches($content, "\{ id: \d+, name:")).Count

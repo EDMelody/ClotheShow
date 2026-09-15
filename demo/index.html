@@ -4,6 +4,11 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#f7f3ec">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="童裳">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="apple-touch-icon" href="icons/icon-180.png">
   <title>童裳 · 童装 3D 展示 Demo</title>
   <style>
     :root {
@@ -418,7 +423,8 @@
       { id: 6, name: '暖杏灯芯绒裤', category: '裤装', meta: '90–130 cm · 宽松版型', price: '¥189', color: '#b87855', bg: '#eaded5', type: 'pants', tag: '秋日' }
     ];
 
-    const state = { category: '全部', favorites: new Set(), current: products[0], rotation: -8, autoRotate: false };
+    const savedFavorites = JSON.parse(localStorage.getItem('tongshang-favorites') || '[]');
+    const state = { category: '全部', favorites: new Set(savedFavorites), current: products[0], rotation: -8, autoRotate: false };
     const icons = {
       jacket: color => `<svg viewBox="0 0 220 240" aria-hidden="true"><path fill="${color}" d="M68 32 94 20h32l26 12 45 42-24 36-24-22v128H71V88l-24 22-24-36 45-42Z"/><path d="M110 22v194M72 82h76M82 119h22v27H82zm34 0h22v27h-22z" fill="none" stroke="#fff" stroke-opacity=".42" stroke-width="4"/><circle cx="110" cy="70" r="3" fill="#fff"/><circle cx="110" cy="92" r="3" fill="#fff"/></svg>`,
       dress: color => `<svg viewBox="0 0 220 240" aria-hidden="true"><path fill="${color}" d="M82 25 98 18h24l16 7 10 46-22 19 48 126H46L94 90 72 71l10-46Z"/><path d="M96 20c1 17 27 17 28 0M75 72h70M65 158c28 13 62 13 90 0" fill="none" stroke="#fff" stroke-opacity=".45" stroke-width="5"/></svg>`,
@@ -497,6 +503,7 @@
 
     function toggleFavorite(id) {
       state.favorites.has(id) ? state.favorites.delete(id) : state.favorites.add(id);
+      localStorage.setItem('tongshang-favorites', JSON.stringify([...state.favorites]));
       renderProducts();
       renderFavorites();
       updateDetailFavorite();
@@ -579,6 +586,7 @@
     renderCategories();
     renderProducts();
     renderFavorites();
+    if ('serviceWorker' in navigator) window.addEventListener('load', () => navigator.serviceWorker.register('./service-worker.js'));
   </script>
 </body>
 </html>

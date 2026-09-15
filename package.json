@@ -1,0 +1,14 @@
+{
+  "name": "tongshang-ios-assets",
+  "private": true,
+  "scripts": {
+    "build:viewer": "esbuild web-src/viewer.js --bundle --format=iife --minify --outfile=TongShang/Resources/Viewer/viewer.bundle.js",
+    "build:models": "node scripts/generate-models.mjs",
+    "build:assets": "npm run build:viewer && npm run build:models",
+    "test:web": "node --test tests/web-app.test.mjs"
+  },
+  "devDependencies": {
+    "esbuild": "0.25.9",
+    "three": "0.180.0"
+  }
+}

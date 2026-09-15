@@ -1,0 +1,11 @@
+{
+  "manifestVersion": 1,
+  "products": [
+    {"id":"coat-001","sku":"CLOTHE-0001","name":"云朵绗缝外套","category":"外套","summary":"轻盈保暖，适合秋冬日常叠穿。","material":"棉质夹层","colors":[{"id":"mist-blue","name":"雾霾蓝","hex":"#7FA5BD"},{"id":"warm-apricot","name":"暖杏色","hex":"#D9AA86"}],"sizes":["90","100","110","120","130"],"thumbnail":"coat-001.svg","modelGLB":"coat-001.v1.glb","modelUSDZ":"coat-001.v1.usdz","assetVersion":1,"price":299},
+    {"id":"dress-002","sku":"CLOTHE-0002","name":"莓果针织连衣裙","category":"裙装","summary":"柔软针织与自然裙摆，舒适不束缚。","material":"精梳棉针织","colors":[{"id":"berry","name":"莓果红","hex":"#C2686D"},{"id":"oat","name":"燕麦色","hex":"#D7C5A9"}],"sizes":["90","100","110","120"],"thumbnail":"dress-002.svg","modelGLB":"dress-002.v1.glb","modelUSDZ":"dress-002.v1.usdz","assetVersion":1,"price":239},
+    {"id":"sweatshirt-003","sku":"CLOTHE-0003","name":"森林口袋卫衣","category":"上衣","summary":"宽松落肩版型，胸前加入童趣口袋。","material":"纯棉毛圈","colors":[{"id":"forest","name":"森林绿","hex":"#7F9270"},{"id":"cream","name":"奶油白","hex":"#E8DFCF"}],"sizes":["90","100","110","120","130","140"],"thumbnail":"sweatshirt-003.svg","modelGLB":"sweatshirt-003.v1.glb","modelUSDZ":"sweatshirt-003.v1.usdz","assetVersion":1,"price":179},
+    {"id":"overall-004","sku":"CLOTHE-0004","name":"阳光背带套装","category":"套装","summary":"轻松搭配的两件套，适合活力出行。","material":"棉麻混纺","colors":[{"id":"sunny","name":"阳光黄","hex":"#D7A64F"},{"id":"denim","name":"浅牛仔蓝","hex":"#7296AF"}],"sizes":["80","90","100","110","120"],"thumbnail":"overall-004.svg","modelGLB":"overall-004.v1.glb","modelUSDZ":"overall-004.v1.usdz","assetVersion":1,"price":259},
+    {"id":"stripe-005","sku":"CLOTHE-0005","name":"海盐条纹衫","category":"上衣","summary":"清爽海盐配色，单穿叠穿都合适。","material":"精梳棉","colors":[{"id":"sea","name":"海盐蓝","hex":"#4F7C99"},{"id":"coral","name":"珊瑚橙","hex":"#D77A63"}],"sizes":["90","100","110","120","130","140"],"thumbnail":"stripe-005.svg","modelGLB":"stripe-005.v1.glb","modelUSDZ":"stripe-005.v1.usdz","assetVersion":1,"price":139},
+    {"id":"pants-006","sku":"CLOTHE-0006","name":"暖杏灯芯绒裤","category":"裤装","summary":"宽松锥形剪裁，活动自在不紧绷。","material":"棉质灯芯绒","colors":[{"id":"apricot","name":"暖杏棕","hex":"#B87855"},{"id":"charcoal","name":"炭灰色","hex":"#59615F"}],"sizes":["90","100","110","120","130"],"thumbnail":"pants-006.svg","modelGLB":"pants-006.v1.glb","modelUSDZ":"pants-006.v1.usdz","assetVersion":1,"price":189}
+  ]
+}
