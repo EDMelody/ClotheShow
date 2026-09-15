@@ -4,7 +4,7 @@ $requiredFiles = @(
     'project.yml', 'TongShang\Info.plist', 'TongShang\TongShangApp.swift',
     'TongShang\Resources\products.json', 'TongShang\Resources\Viewer\index.html',
     'TongShang\Resources\Viewer\viewer.bundle.js', 'TongShangTests\ProductTests.swift',
-    '.github\workflows\ios.yml'
+    '.github\workflows\ios.yml', 'scripts\install-apple-prerequisites.ps1'
 )
 foreach ($relative in $requiredFiles) {
     if (-not (Test-Path -LiteralPath (Join-Path $root $relative) -PathType Leaf)) { throw "缺少 iOS 工程文件：$relative" }
