@@ -1,0 +1,584 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#f7f3ec">
+  <title>童裳 · 童装 3D 展示 Demo</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #1f2b2a;
+      --muted: #75817f;
+      --paper: #fffdf8;
+      --canvas: #eee9df;
+      --line: rgba(31, 43, 42, .1);
+      --brand: #ed6b4e;
+      --brand-dark: #ca4f36;
+      --mint: #a8c9bd;
+      --yellow: #f2cd72;
+      --shadow: 0 22px 70px rgba(52, 43, 32, .16);
+      font-family: ui-rounded, "SF Pro Rounded", "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+    html, body { min-height: 100%; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 18% 12%, rgba(242, 205, 114, .42), transparent 28rem),
+        radial-gradient(circle at 82% 88%, rgba(168, 201, 189, .5), transparent 30rem),
+        var(--canvas);
+    }
+
+    button { font: inherit; }
+    button:focus-visible { outline: 3px solid rgba(237, 107, 78, .34); outline-offset: 2px; }
+
+    .page-shell {
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      padding: 28px 16px;
+    }
+
+    .prototype-note {
+      position: fixed;
+      top: 20px;
+      left: 24px;
+      max-width: 260px;
+      color: #52605e;
+      font-size: 13px;
+      line-height: 1.65;
+    }
+
+    .prototype-note strong {
+      display: block;
+      color: var(--ink);
+      font-size: 19px;
+      margin-bottom: 4px;
+    }
+
+    .phone {
+      position: relative;
+      width: min(430px, 100%);
+      height: min(860px, calc(100vh - 56px));
+      min-height: 680px;
+      overflow: hidden;
+      border: 1px solid rgba(255, 255, 255, .88);
+      border-radius: 42px;
+      background: var(--paper);
+      box-shadow: var(--shadow), inset 0 0 0 1px rgba(31, 43, 42, .05);
+    }
+
+    .status-bar {
+      height: 42px;
+      padding: 13px 24px 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 12px;
+      font-weight: 750;
+      letter-spacing: .02em;
+      position: relative;
+      z-index: 20;
+    }
+
+    .status-icons { display: flex; gap: 5px; align-items: center; }
+    .status-icons i { display: block; border-radius: 8px; background: var(--ink); }
+    .signal { width: 13px; height: 8px; clip-path: polygon(0 100%, 25% 70%, 50% 45%, 75% 20%, 100% 0, 100% 100%); }
+    .wifi { width: 11px; height: 8px; clip-path: polygon(50% 100%, 0 30%, 13% 17%, 50% 66%, 87% 17%, 100% 30%); }
+    .battery { width: 18px; height: 8px; }
+
+    .app-view {
+      height: calc(100% - 42px);
+      overflow-y: auto;
+      overscroll-behavior: contain;
+      scrollbar-width: none;
+      padding-bottom: 104px;
+    }
+    .app-view::-webkit-scrollbar { display: none; }
+    .screen { display: none; }
+    .screen.active { display: block; animation: screen-in .28s ease-out both; }
+
+    .home-header { padding: 14px 22px 0; }
+    .eyebrow { margin: 0 0 6px; color: var(--brand); font-size: 12px; font-weight: 800; letter-spacing: .14em; }
+    h1 { margin: 0; font-size: 31px; line-height: 1.16; letter-spacing: -.035em; }
+    .header-row { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; }
+
+    .icon-button {
+      width: 44px;
+      height: 44px;
+      flex: 0 0 auto;
+      display: grid;
+      place-items: center;
+      border: 1px solid var(--line);
+      border-radius: 50%;
+      color: var(--ink);
+      background: rgba(255, 255, 255, .78);
+      box-shadow: 0 8px 20px rgba(31, 43, 42, .06);
+      cursor: pointer;
+    }
+
+    .hero {
+      position: relative;
+      overflow: hidden;
+      margin: 22px;
+      min-height: 170px;
+      padding: 24px 176px 24px 22px;
+      border-radius: 28px;
+      background: #223432;
+      color: white;
+    }
+    .hero::before, .hero::after {
+      content: "";
+      position: absolute;
+      border-radius: 50%;
+      background: var(--yellow);
+      opacity: .9;
+    }
+    .hero::before { width: 160px; height: 160px; right: -20px; top: -48px; }
+    .hero::after { width: 66px; height: 66px; right: 104px; bottom: -26px; background: var(--brand); }
+    .hero h2 { position: relative; margin: 0 0 8px; font-size: 22px; line-height: 1.25; z-index: 2; }
+    .hero p { position: relative; margin: 0 0 18px; color: rgba(255,255,255,.72); font-size: 13px; line-height: 1.55; z-index: 2; }
+    .hero-garment { position: absolute; width: 154px; right: 5px; bottom: -8px; z-index: 1; filter: drop-shadow(0 14px 16px rgba(0,0,0,.18)); }
+
+    .scan-button {
+      position: relative;
+      z-index: 3;
+      border: 0;
+      border-radius: 999px;
+      padding: 11px 16px;
+      color: var(--ink);
+      background: white;
+      font-size: 13px;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    .section-head { display: flex; align-items: center; justify-content: space-between; margin: 4px 22px 14px; }
+    .section-head h2 { margin: 0; font-size: 19px; }
+    .section-head span { color: var(--muted); font-size: 12px; }
+
+    .chips { display: flex; gap: 9px; overflow-x: auto; padding: 0 22px 18px; scrollbar-width: none; }
+    .chips::-webkit-scrollbar { display: none; }
+    .chip {
+      white-space: nowrap;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 9px 15px;
+      color: var(--muted);
+      background: white;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .chip.active { border-color: var(--ink); color: white; background: var(--ink); }
+
+    .product-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; padding: 0 22px; }
+    .product-card { position: relative; min-width: 0; cursor: pointer; }
+    .product-visual {
+      position: relative;
+      aspect-ratio: .86;
+      overflow: hidden;
+      display: grid;
+      place-items: center;
+      border-radius: 24px;
+      background: var(--card-bg, #ece6dc);
+      transition: transform .2s ease;
+    }
+    .product-card:hover .product-visual { transform: translateY(-3px); }
+    .product-visual svg { width: 79%; height: 79%; filter: drop-shadow(0 13px 12px rgba(43, 44, 40, .12)); }
+    .tag { position: absolute; left: 11px; top: 11px; padding: 6px 9px; border-radius: 999px; color: var(--ink); background: rgba(255,255,255,.84); font-size: 10px; font-weight: 800; }
+    .favorite {
+      position: absolute;
+      right: 10px;
+      top: 10px;
+      width: 34px;
+      height: 34px;
+      display: grid;
+      place-items: center;
+      border: 0;
+      border-radius: 50%;
+      color: var(--ink);
+      background: rgba(255,255,255,.84);
+      cursor: pointer;
+    }
+    .favorite.active { color: var(--brand); }
+    .product-info { padding: 10px 4px 4px; }
+    .product-info h3 { overflow: hidden; margin: 0 0 4px; font-size: 14px; text-overflow: ellipsis; white-space: nowrap; }
+    .product-info p { margin: 0; color: var(--muted); font-size: 11px; }
+
+    .detail-top { display: flex; align-items: center; justify-content: space-between; padding: 10px 20px 14px; }
+    .detail-title { font-size: 15px; font-weight: 800; }
+    .model-stage {
+      position: relative;
+      height: 390px;
+      margin: 0 16px;
+      overflow: hidden;
+      display: grid;
+      place-items: center;
+      border-radius: 32px;
+      background:
+        radial-gradient(circle at 50% 40%, rgba(255,255,255,.95), rgba(255,255,255,.1) 42%),
+        var(--stage-bg, #dfe7e1);
+      touch-action: none;
+      cursor: grab;
+    }
+    .model-stage:active { cursor: grabbing; }
+    .model-stage::after { content: ""; position: absolute; width: 170px; height: 25px; bottom: 45px; border-radius: 50%; background: rgba(31,43,42,.13); filter: blur(7px); }
+    .model-garment { width: 72%; z-index: 2; transform: perspective(800px) rotateY(var(--rotation, -8deg)); transition: transform .12s ease-out; filter: drop-shadow(0 25px 20px rgba(31,43,42,.15)); }
+    .model-badge { position: absolute; left: 18px; top: 18px; z-index: 3; padding: 8px 11px; border-radius: 999px; background: rgba(255,255,255,.8); backdrop-filter: blur(12px); font-size: 11px; font-weight: 800; }
+    .model-hint { position: absolute; bottom: 15px; z-index: 3; color: rgba(31,43,42,.58); font-size: 11px; }
+
+    .detail-content { padding: 20px 22px 10px; }
+    .detail-heading { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; }
+    .detail-heading h1 { font-size: 25px; }
+    .detail-heading p { margin: 7px 0 0; color: var(--muted); font-size: 12px; }
+    .price { color: var(--brand); font-size: 18px; font-weight: 850; white-space: nowrap; }
+    .option-label { margin: 20px 0 10px; font-size: 12px; font-weight: 800; }
+    .swatches { display: flex; gap: 10px; }
+    .swatch { width: 32px; height: 32px; border: 5px solid white; border-radius: 50%; background: var(--swatch); box-shadow: 0 0 0 1px var(--line); cursor: pointer; }
+    .swatch.active { box-shadow: 0 0 0 2px var(--ink); }
+    .detail-actions { display: grid; grid-template-columns: 1fr auto; gap: 10px; margin-top: 22px; }
+    .primary-action, .secondary-action { min-height: 52px; border-radius: 17px; font-weight: 800; cursor: pointer; }
+    .primary-action { border: 0; color: white; background: var(--brand); box-shadow: 0 12px 24px rgba(237,107,78,.22); }
+    .secondary-action { width: 56px; border: 1px solid var(--line); background: white; }
+
+    .bottom-nav {
+      position: absolute;
+      left: 12px;
+      right: 12px;
+      bottom: 10px;
+      z-index: 30;
+      height: 76px;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      align-items: center;
+      border: 1px solid rgba(31,43,42,.07);
+      border-radius: 25px;
+      background: rgba(255,253,248,.9);
+      box-shadow: 0 13px 28px rgba(31,43,42,.12);
+      backdrop-filter: blur(20px);
+    }
+    .nav-item { height: 58px; border: 0; color: var(--muted); background: transparent; display: grid; place-items: center; gap: 3px; font-size: 10px; cursor: pointer; }
+    .nav-item svg { width: 22px; height: 22px; }
+    .nav-item.active { color: var(--brand); font-weight: 800; }
+    .nav-scan { width: 54px; height: 54px; justify-self: center; margin-top: -28px; border-radius: 20px; color: white; background: var(--ink); box-shadow: 0 12px 20px rgba(31,43,42,.22); }
+
+    .empty-state { padding: 80px 32px; text-align: center; }
+    .empty-icon { width: 80px; height: 80px; margin: 0 auto 18px; display: grid; place-items: center; border-radius: 28px; color: var(--brand); background: #f8e5dc; }
+    .empty-state h2 { margin: 0 0 8px; }
+    .empty-state p { margin: 0; color: var(--muted); font-size: 13px; line-height: 1.6; }
+
+    .scanner {
+      position: absolute;
+      inset: 0;
+      z-index: 60;
+      display: none;
+      overflow: hidden;
+      color: white;
+      background:
+        linear-gradient(rgba(15, 23, 22, .18), rgba(15, 23, 22, .64)),
+        radial-gradient(circle at 68% 32%, #859b91 0 12%, transparent 36%),
+        linear-gradient(145deg, #81928b, #263b39 70%);
+    }
+    .scanner.active { display: block; animation: fade-in .2s ease both; }
+    .scanner-top { display: flex; align-items: center; justify-content: space-between; padding: 58px 22px 0; }
+    .scanner-top h2 { margin: 0; font-size: 17px; }
+    .scanner-close { color: white; background: rgba(0,0,0,.22); border-color: rgba(255,255,255,.15); }
+    .scan-frame { position: absolute; left: 50%; top: 48%; width: 260px; height: 260px; transform: translate(-50%, -50%); border: 2px solid rgba(255,255,255,.8); border-radius: 28px; }
+    .scan-frame::before, .scan-frame::after { content: ""; position: absolute; inset: -3px; border-radius: 29px; border: 4px solid transparent; border-top-color: var(--yellow); border-left-color: var(--yellow); clip-path: polygon(0 0, 35% 0, 35% 8%, 8% 8%, 8% 35%, 0 35%); }
+    .scan-frame::after { transform: rotate(180deg); }
+    .scan-line { position: absolute; left: 13px; right: 13px; top: 28px; height: 2px; border-radius: 2px; background: var(--yellow); box-shadow: 0 0 14px var(--yellow); animation: scan 2s ease-in-out infinite; }
+    .scan-copy { position: absolute; left: 20px; right: 20px; bottom: 82px; text-align: center; }
+    .scan-copy strong { display: block; margin-bottom: 6px; font-size: 15px; }
+    .scan-copy span { color: rgba(255,255,255,.68); font-size: 12px; }
+
+    .toast { position: absolute; left: 50%; bottom: 100px; z-index: 80; opacity: 0; pointer-events: none; transform: translate(-50%, 14px); padding: 11px 15px; border-radius: 999px; color: white; background: rgba(31,43,42,.9); white-space: nowrap; font-size: 12px; transition: .25s ease; }
+    .toast.active { opacity: 1; transform: translate(-50%, 0); }
+
+    @keyframes screen-in { from { opacity: 0; transform: translateY(8px); } }
+    @keyframes fade-in { from { opacity: 0; } }
+    @keyframes scan { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(198px); } }
+    @media (max-width: 860px) { .prototype-note { display: none; } }
+    @media (max-width: 480px) {
+      .page-shell { padding: 0; }
+      .phone { width: 100%; height: 100vh; min-height: 620px; border: 0; border-radius: 0; box-shadow: none; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; scroll-behavior: auto !important; transition-duration: .01ms !important; }
+    }
+  </style>
+</head>
+<body>
+  <aside class="prototype-note" aria-label="原型说明">
+    <strong>童裳 · V1 视觉原型</strong>
+    离线 HTML Demo，展示童装浏览、扫码入口、商品详情和 3D 交互区域的大致风格。
+  </aside>
+
+  <main class="page-shell">
+    <section class="phone" aria-label="童装展示 App 原型">
+      <div class="status-bar" aria-hidden="true">
+        <span>9:41</span>
+        <span class="status-icons"><i class="signal"></i><i class="wifi"></i><i class="battery"></i></span>
+      </div>
+
+      <div class="app-view" id="appView">
+        <section class="screen active" id="homeScreen" aria-label="首页">
+          <header class="home-header">
+            <p class="eyebrow">NEW SEASON</p>
+            <div class="header-row">
+              <h1>发现孩子的<br>今日穿搭</h1>
+              <button class="icon-button" id="headerFavorite" aria-label="查看收藏">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20.8 4.7a5.5 5.5 0 0 0-7.8 0L12 5.8l-1.1-1.1a5.5 5.5 0 0 0-7.8 7.8l1.1 1.1L12 21l7.8-7.4 1.1-1.1a5.5 5.5 0 0 0-.1-7.8Z"/></svg>
+              </button>
+            </div>
+          </header>
+
+          <section class="hero" aria-label="扫码展示">
+            <h2>一扫即见<br>立体新装</h2>
+            <p>对准吊牌二维码，立即查看对应童装模型。</p>
+            <button class="scan-button" data-open-scanner>开始扫描&nbsp; →</button>
+            <div class="hero-garment" id="heroGarment" aria-hidden="true"></div>
+          </section>
+
+          <div class="section-head"><h2>精选童装</h2><span id="productCount">6 件</span></div>
+          <div class="chips" id="categoryChips" aria-label="商品分类"></div>
+          <div class="product-grid" id="productGrid"></div>
+        </section>
+
+        <section class="screen" id="detailScreen" aria-label="商品详情">
+          <header class="detail-top">
+            <button class="icon-button" id="backButton" aria-label="返回首页">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m15 18-6-6 6-6"/></svg>
+            </button>
+            <span class="detail-title">3D 商品详情</span>
+            <button class="icon-button" id="detailFavorite" aria-label="收藏商品">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20.8 4.7a5.5 5.5 0 0 0-7.8 0L12 5.8l-1.1-1.1a5.5 5.5 0 0 0-7.8 7.8l1.1 1.1L12 21l7.8-7.4 1.1-1.1a5.5 5.5 0 0 0-.1-7.8Z"/></svg>
+            </button>
+          </header>
+          <div class="model-stage" id="modelStage" aria-label="可拖动旋转的 3D 模型效果区">
+            <span class="model-badge">3D 预览</span>
+            <div class="model-garment" id="modelGarment"></div>
+            <span class="model-hint">左右拖动旋转 · 双指缩放将在正式版提供</span>
+          </div>
+          <div class="detail-content">
+            <div class="detail-heading">
+              <div><h1 id="detailName"></h1><p id="detailMeta"></p></div>
+              <span class="price" id="detailPrice"></span>
+            </div>
+            <p class="option-label">选择颜色</p>
+            <div class="swatches" id="colorSwatches"></div>
+            <div class="detail-actions">
+              <button class="primary-action" id="arButton">在现实环境中查看</button>
+              <button class="secondary-action" id="rotateButton" aria-label="自动旋转模型">↻</button>
+            </div>
+          </div>
+        </section>
+
+        <section class="screen" id="favoriteScreen" aria-label="收藏">
+          <header class="home-header"><p class="eyebrow">MY PICKS</p><h1>我的收藏</h1></header>
+          <div class="empty-state" id="favoriteEmpty">
+            <div class="empty-icon">♡</div><h2>还没有收藏</h2><p>在商品卡片或详情页点击爱心，<br>喜欢的款式会出现在这里。</p>
+          </div>
+          <div class="product-grid" id="favoriteGrid"></div>
+        </section>
+      </div>
+
+      <nav class="bottom-nav" aria-label="主导航">
+        <button class="nav-item active" data-screen="homeScreen" aria-label="首页">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 10.5 12 3l9 7.5V21H3Z"/><path d="M9 21v-6h6v6"/></svg><span>首页</span>
+        </button>
+        <button class="nav-item nav-scan" data-open-scanner aria-label="扫一扫">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 8V4h4M16 4h4v4M20 16v4h-4M8 20H4v-4"/><path d="M8 12h8M12 8v8"/></svg><span>扫一扫</span>
+        </button>
+        <button class="nav-item" data-screen="favoriteScreen" aria-label="收藏">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20.8 4.7a5.5 5.5 0 0 0-7.8 0L12 5.8l-1.1-1.1a5.5 5.5 0 0 0-7.8 7.8l1.1 1.1L12 21l7.8-7.4 1.1-1.1a5.5 5.5 0 0 0-.1-7.8Z"/></svg><span>收藏</span>
+        </button>
+      </nav>
+
+      <section class="scanner" id="scanner" aria-label="模拟扫描界面" aria-hidden="true">
+        <div class="scanner-top"><h2>扫描童装吊牌</h2><button class="icon-button scanner-close" id="scannerClose" aria-label="关闭扫描">×</button></div>
+        <div class="scan-frame"><div class="scan-line"></div></div>
+        <div class="scan-copy"><strong id="scanStatus">将二维码放入框内</strong><span>这是交互演示，稍后会模拟识别一件商品</span></div>
+      </section>
+
+      <div class="toast" id="toast" role="status" aria-live="polite"></div>
+    </section>
+  </main>
+
+  <script>
+    const products = [
+      { id: 1, name: '云朵绗缝外套', category: '外套', meta: '90–130 cm · 轻暖夹棉', price: '¥299', color: '#7fa5bd', bg: '#dfe9ed', type: 'jacket', tag: 'NEW' },
+      { id: 2, name: '莓果针织连衣裙', category: '裙装', meta: '90–120 cm · 柔软针织', price: '¥239', color: '#c2686d', bg: '#f1dfdd', type: 'dress', tag: '人气' },
+      { id: 3, name: '森林口袋卫衣', category: '上衣', meta: '90–140 cm · 纯棉毛圈', price: '¥179', color: '#7f9270', bg: '#e2e7dc', type: 'shirt', tag: '舒适' },
+      { id: 4, name: '阳光背带套装', category: '套装', meta: '80–120 cm · 两件套', price: '¥259', color: '#d7a64f', bg: '#f2e7c8', type: 'overall', tag: '套装' },
+      { id: 5, name: '海盐条纹衫', category: '上衣', meta: '90–140 cm · 精梳棉', price: '¥139', color: '#4f7c99', bg: '#dce7ec', type: 'shirt', tag: '基础款' },
+      { id: 6, name: '暖杏灯芯绒裤', category: '裤装', meta: '90–130 cm · 宽松版型', price: '¥189', color: '#b87855', bg: '#eaded5', type: 'pants', tag: '秋日' }
+    ];
+
+    const state = { category: '全部', favorites: new Set(), current: products[0], rotation: -8, autoRotate: false };
+    const icons = {
+      jacket: color => `<svg viewBox="0 0 220 240" aria-hidden="true"><path fill="${color}" d="M68 32 94 20h32l26 12 45 42-24 36-24-22v128H71V88l-24 22-24-36 45-42Z"/><path d="M110 22v194M72 82h76M82 119h22v27H82zm34 0h22v27h-22z" fill="none" stroke="#fff" stroke-opacity=".42" stroke-width="4"/><circle cx="110" cy="70" r="3" fill="#fff"/><circle cx="110" cy="92" r="3" fill="#fff"/></svg>`,
+      dress: color => `<svg viewBox="0 0 220 240" aria-hidden="true"><path fill="${color}" d="M82 25 98 18h24l16 7 10 46-22 19 48 126H46L94 90 72 71l10-46Z"/><path d="M96 20c1 17 27 17 28 0M75 72h70M65 158c28 13 62 13 90 0" fill="none" stroke="#fff" stroke-opacity=".45" stroke-width="5"/></svg>`,
+      shirt: color => `<svg viewBox="0 0 220 240" aria-hidden="true"><path fill="${color}" d="M72 35 96 20h28l24 15 48 37-26 39-25-17v122H75V94l-25 17-26-39 48-37Z"/><path d="M95 21c1 21 29 21 30 0M76 101h68" fill="none" stroke="#fff" stroke-opacity=".45" stroke-width="5"/></svg>`,
+      overall: color => `<svg viewBox="0 0 220 240" aria-hidden="true"><path fill="#f1e9d9" d="M62 37 94 20h32l32 17 37 34-23 35-28-17v47H76V89l-28 17-23-35 37-34Z"/><path fill="${color}" d="M76 71h68l18 145h-44l-8-67-8 67H58L76 71Z"/><path d="M86 70V36m48 34V36M89 106h42v30H89" fill="none" stroke="#fff" stroke-opacity=".6" stroke-width="6"/></svg>`,
+      pants: color => `<svg viewBox="0 0 220 240" aria-hidden="true"><path fill="${color}" d="M70 24h80l12 192h-47l-5-105-5 105H58L70 24Z"/><path d="M69 57h82M110 27v84M79 71h21v25H79m41-25h21v25h-21" fill="none" stroke="#fff" stroke-opacity=".4" stroke-width="5"/></svg>`
+    };
+
+    const $ = selector => document.querySelector(selector);
+    const $$ = selector => [...document.querySelectorAll(selector)];
+    const garment = product => icons[product.type](product.color);
+
+    function renderCategories() {
+      const categories = ['全部', ...new Set(products.map(product => product.category))];
+      $('#categoryChips').innerHTML = categories.map(category => `<button class="chip ${state.category === category ? 'active' : ''}" data-category="${category}">${category}</button>`).join('');
+      $$('.chip').forEach(button => button.addEventListener('click', () => { state.category = button.dataset.category; renderCategories(); renderProducts(); }));
+    }
+
+    function cardTemplate(product) {
+      return `<article class="product-card" data-product="${product.id}" tabindex="0" aria-label="查看${product.name}">
+        <div class="product-visual" style="--card-bg:${product.bg}"><span class="tag">${product.tag}</span>${garment(product)}
+          <button class="favorite ${state.favorites.has(product.id) ? 'active' : ''}" data-favorite="${product.id}" aria-label="收藏${product.name}">${state.favorites.has(product.id) ? '♥' : '♡'}</button>
+        </div><div class="product-info"><h3>${product.name}</h3><p>${product.meta}</p></div></article>`;
+    }
+
+    function bindProductCards(container) {
+      container.querySelectorAll('.product-card').forEach(card => {
+        const open = () => openDetail(Number(card.dataset.product));
+        card.addEventListener('click', event => { if (!event.target.closest('[data-favorite]')) open(); });
+        card.addEventListener('keydown', event => { if (event.key === 'Enter') open(); });
+      });
+      container.querySelectorAll('[data-favorite]').forEach(button => button.addEventListener('click', event => {
+        event.stopPropagation();
+        toggleFavorite(Number(button.dataset.favorite));
+      }));
+    }
+
+    function renderProducts() {
+      const filtered = state.category === '全部' ? products : products.filter(product => product.category === state.category);
+      $('#productCount').textContent = `${filtered.length} 件`;
+      $('#productGrid').innerHTML = filtered.map(cardTemplate).join('');
+      bindProductCards($('#productGrid'));
+    }
+
+    function showScreen(id) {
+      $$('.screen').forEach(screen => screen.classList.toggle('active', screen.id === id));
+      $$('.nav-item[data-screen]').forEach(item => item.classList.toggle('active', item.dataset.screen === id));
+      $('#appView').scrollTop = 0;
+      if (id === 'favoriteScreen') renderFavorites();
+    }
+
+    function openDetail(id) {
+      state.current = products.find(product => product.id === id) || products[0];
+      state.rotation = -8;
+      $('#detailName').textContent = state.current.name;
+      $('#detailMeta').textContent = state.current.meta;
+      $('#detailPrice').textContent = state.current.price;
+      $('#modelGarment').innerHTML = garment(state.current);
+      $('#modelStage').style.setProperty('--stage-bg', state.current.bg);
+      $('#modelGarment').style.setProperty('--rotation', `${state.rotation}deg`);
+      renderSwatches();
+      updateDetailFavorite();
+      showScreen('detailScreen');
+    }
+
+    function renderSwatches() {
+      const colors = [state.current.color, '#e8b2a0', '#425e68'];
+      $('#colorSwatches').innerHTML = colors.map((color, index) => `<button class="swatch ${index === 0 ? 'active' : ''}" style="--swatch:${color}" data-color="${color}" aria-label="选择颜色 ${index + 1}"></button>`).join('');
+      $$('.swatch').forEach(button => button.addEventListener('click', () => {
+        $$('.swatch').forEach(item => item.classList.remove('active'));
+        button.classList.add('active');
+        const preview = { ...state.current, color: button.dataset.color };
+        $('#modelGarment').innerHTML = garment(preview);
+      }));
+    }
+
+    function toggleFavorite(id) {
+      state.favorites.has(id) ? state.favorites.delete(id) : state.favorites.add(id);
+      renderProducts();
+      renderFavorites();
+      updateDetailFavorite();
+      showToast(state.favorites.has(id) ? '已加入收藏' : '已取消收藏');
+    }
+
+    function updateDetailFavorite() {
+      const active = state.favorites.has(state.current.id);
+      $('#detailFavorite').classList.toggle('active', active);
+      $('#detailFavorite').innerHTML = active ? '♥' : `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20.8 4.7a5.5 5.5 0 0 0-7.8 0L12 5.8l-1.1-1.1a5.5 5.5 0 0 0-7.8 7.8l1.1 1.1L12 21l7.8-7.4 1.1-1.1a5.5 5.5 0 0 0-.1-7.8Z"/></svg>`;
+    }
+
+    function renderFavorites() {
+      const items = products.filter(product => state.favorites.has(product.id));
+      $('#favoriteEmpty').hidden = items.length > 0;
+      $('#favoriteGrid').innerHTML = items.map(cardTemplate).join('');
+      bindProductCards($('#favoriteGrid'));
+    }
+
+    let toastTimer;
+    function showToast(message) {
+      clearTimeout(toastTimer);
+      $('#toast').textContent = message;
+      $('#toast').classList.add('active');
+      toastTimer = setTimeout(() => $('#toast').classList.remove('active'), 1800);
+    }
+
+    let scanTimer;
+    function openScanner() {
+      $('#scanner').classList.add('active');
+      $('#scanner').setAttribute('aria-hidden', 'false');
+      $('#scanStatus').textContent = '将二维码放入框内';
+      clearTimeout(scanTimer);
+      scanTimer = setTimeout(() => {
+        $('#scanStatus').textContent = '识别成功 · CLOTHE-0001';
+        setTimeout(() => { closeScanner(); openDetail(1); showToast('已找到对应商品'); }, 650);
+      }, 1700);
+    }
+
+    function closeScanner() {
+      clearTimeout(scanTimer);
+      $('#scanner').classList.remove('active');
+      $('#scanner').setAttribute('aria-hidden', 'true');
+    }
+
+    let dragging = false;
+    let dragX = 0;
+    $('#modelStage').addEventListener('pointerdown', event => { dragging = true; dragX = event.clientX; $('#modelStage').setPointerCapture(event.pointerId); });
+    $('#modelStage').addEventListener('pointermove', event => {
+      if (!dragging) return;
+      state.rotation += (event.clientX - dragX) * .7;
+      dragX = event.clientX;
+      $('#modelGarment').style.setProperty('--rotation', `${state.rotation}deg`);
+    });
+    $('#modelStage').addEventListener('pointerup', () => { dragging = false; });
+
+    let autoFrame;
+    function animateRotation() {
+      if (!state.autoRotate) return;
+      state.rotation = (state.rotation + .45) % 360;
+      $('#modelGarment').style.setProperty('--rotation', `${state.rotation}deg`);
+      autoFrame = requestAnimationFrame(animateRotation);
+    }
+
+    $$('[data-open-scanner]').forEach(button => button.addEventListener('click', openScanner));
+    $$('.nav-item[data-screen]').forEach(button => button.addEventListener('click', () => showScreen(button.dataset.screen)));
+    $('#scannerClose').addEventListener('click', closeScanner);
+    $('#backButton').addEventListener('click', () => showScreen('homeScreen'));
+    $('#headerFavorite').addEventListener('click', () => showScreen('favoriteScreen'));
+    $('#detailFavorite').addEventListener('click', () => toggleFavorite(state.current.id));
+    $('#arButton').addEventListener('click', () => showToast('正式版将在这里打开 AR 预览'));
+    $('#rotateButton').addEventListener('click', () => {
+      state.autoRotate = !state.autoRotate;
+      $('#rotateButton').textContent = state.autoRotate ? 'Ⅱ' : '↻';
+      cancelAnimationFrame(autoFrame);
+      if (state.autoRotate) animateRotation();
+    });
+
+    $('#heroGarment').innerHTML = garment(products[0]);
+    renderCategories();
+    renderProducts();
+    renderFavorites();
+  </script>
+</body>
+</html>
