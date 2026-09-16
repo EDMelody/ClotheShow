@@ -94,7 +94,8 @@ struct ThreeDViewer: UIViewRepresentable {
             guard let data = try? JSONSerialization.data(withJSONObject: command.payload),
                   let json = String(data: data, encoding: .utf8) else { return }
             lastSentCommand = command
-            webView?.evaluateJavaScript("window.loadProduct(\(json))") { [weak self] _, error in
+            // Discard the async function's Promise so WKWebView only has to bridge a null result.
+            webView?.evaluateJavaScript("window.loadProduct(\(json)); null;") { [weak self] _, error in
                 guard let self, let error else { return }
                 self.lastSentCommand = nil
                 self.setState(.failed("3D 查看器暂时不可用：\(error.localizedDescription)"))

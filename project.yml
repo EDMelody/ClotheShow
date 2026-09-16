@@ -35,8 +35,8 @@ targets:
       properties:
         CFBundleDisplayName: TongShang
         CFBundleName: TongShang
-        CFBundleShortVersionString: 1.0.1
-        CFBundleVersion: 2
+        CFBundleShortVersionString: 1.0.2
+        CFBundleVersion: 3
         UILaunchScreen: {}
         NSCameraUsageDescription: 相机仅用于扫描童装吊牌上的商品编码；画面不会被保存或上传。
         UIApplicationSceneManifest:
@@ -48,8 +48,8 @@ targets:
         PRODUCT_BUNDLE_IDENTIFIER: com.edmelody.tongshang.viewer
         TARGETED_DEVICE_FAMILY: "1"
         ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS: YES
-        MARKETING_VERSION: 1.0.1
-        CURRENT_PROJECT_VERSION: 2
+        MARKETING_VERSION: 1.0.2
+        CURRENT_PROJECT_VERSION: 3
   TongShangTests:
     type: bundle.unit-test
     platform: iOS

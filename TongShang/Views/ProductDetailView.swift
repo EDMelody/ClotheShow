@@ -70,7 +70,7 @@ struct ProductDetailView: View {
             }
         }
         .onAppear { store.recordVisit(product) }
-        .sheet(isPresented: $showAR) { ARQuickLookView(fileURL: arURL) }
+        .sheet(isPresented: $showAR) { ARQuickLookView(fileURL: arURL, isPresented: $showAR) }
         .alert("AR 预览不可用", isPresented: Binding(get: { arError != nil }, set: { if !$0 { arError = nil } })) {
             Button("知道了") { arError = nil }
         } message: { Text(arError ?? "请继续使用普通 3D 预览。") }

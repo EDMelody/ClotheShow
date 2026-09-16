@@ -42,6 +42,14 @@ $viewerBridge = Get-Content -Raw -Encoding UTF8 (Join-Path $root 'TongShang\View
 foreach ($required in @('lastSentCommand', 'dismantleUIView', 'webViewWebContentProcessDidTerminate')) {
     if (-not $viewerBridge.Contains($required)) { throw "iOS 3D 桥接缺少生命周期保护：$required" }
 }
+if (-not $viewerBridge.Contains('window.loadProduct(\(json)); null;')) {
+    throw 'iOS 3D 桥接必须丢弃异步 Promise，避免 WKWebView 误报返回值错误。'
+}
+
+$arQuickLook = Get-Content -Raw -Encoding UTF8 (Join-Path $root 'TongShang\Viewer\ARQuickLookView.swift')
+foreach ($required in @('UINavigationController', 'UIBarButtonItem', 'title: "返回"', '@objc func close()', 'isPresented = false')) {
+    if (-not $arQuickLook.Contains($required)) { throw "AR 预览缺少可见的返回能力：$required" }
+}
 
 $homeView = Get-Content -Raw -Encoding UTF8 (Join-Path $root 'TongShang\Views\HomeView.swift')
 if (-not $homeView.Contains('.aspectRatio(1, contentMode: .fit)') -or -not $homeView.Contains('.padding(.bottom, 28)')) {
@@ -71,14 +79,14 @@ $projectSpec = Get-Content -Raw -Encoding UTF8 (Join-Path $root 'project.yml')
 foreach ($required in @(
     'buildPhase: resources', 'destination: resources', 'subpath: Viewer', 'subpath: Models',
     'CFBundleDisplayName: TongShang', 'CFBundleName: TongShang',
-    'CFBundleShortVersionString: 1.0.1', 'CFBundleVersion: 2',
+    'CFBundleShortVersionString: 1.0.2', 'CFBundleVersion: 3',
     'PRODUCT_BUNDLE_IDENTIFIER: com.edmelody.tongshang.viewer', 'TongShang/Resources/zh-Hans.lproj',
-    'MARKETING_VERSION: 1.0.1', 'CURRENT_PROJECT_VERSION: 2'
+    'MARKETING_VERSION: 1.0.2', 'CURRENT_PROJECT_VERSION: 3'
 )) {
     if (-not $projectSpec.Contains($required)) { throw "XcodeGen 工程未正确声明打包资源：$required" }
 }
-if ($projectSpec -notmatch '(?ms)TongShang:\s+type: application.*?settings:\s+base:.*?MARKETING_VERSION: 1\.0\.1\s+CURRENT_PROJECT_VERSION: 2') {
-    throw '应用 target 未配置 1.0.1 (2) 版本号。'
+if ($projectSpec -notmatch '(?ms)TongShang:\s+type: application.*?settings:\s+base:.*?MARKETING_VERSION: 1\.0\.2\s+CURRENT_PROJECT_VERSION: 3') {
+    throw '应用 target 未配置 1.0.2 (3) 版本号。'
 }
 $localizedInfo = Get-Content -Raw -Encoding UTF8 (Join-Path $root 'TongShang\Resources\zh-Hans.lproj\InfoPlist.strings')
 if (-not $localizedInfo.Contains('"CFBundleDisplayName" = "童裳";')) {
