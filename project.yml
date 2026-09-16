@@ -16,12 +16,18 @@ targets:
       - path: TongShang
         excludes:
           - Resources
-    resources:
       - path: TongShang/Resources/products.json
+        buildPhase: resources
       - path: TongShang/Resources/Viewer
-        type: folder
+        buildPhase:
+          copyFiles:
+            destination: resources
+            subpath: Viewer
       - path: TongShang/Resources/Models
-        type: folder
+        buildPhase:
+          copyFiles:
+            destination: resources
+            subpath: Models
     info:
       path: TongShang/Info.plist
       properties:
