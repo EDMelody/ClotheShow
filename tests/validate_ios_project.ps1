@@ -71,6 +71,7 @@ $projectSpec = Get-Content -Raw -Encoding UTF8 (Join-Path $root 'project.yml')
 foreach ($required in @(
     'buildPhase: resources', 'destination: resources', 'subpath: Viewer', 'subpath: Models',
     'CFBundleDisplayName: TongShang', 'CFBundleName: TongShang',
+    'CFBundleShortVersionString: 1.0.1', 'CFBundleVersion: 2',
     'PRODUCT_BUNDLE_IDENTIFIER: com.edmelody.tongshang.viewer', 'TongShang/Resources/zh-Hans.lproj',
     'MARKETING_VERSION: 1.0.1', 'CURRENT_PROJECT_VERSION: 2'
 )) {

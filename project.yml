@@ -35,6 +35,8 @@ targets:
       properties:
         CFBundleDisplayName: TongShang
         CFBundleName: TongShang
+        CFBundleShortVersionString: 1.0.1
+        CFBundleVersion: 2
         UILaunchScreen: {}
         NSCameraUsageDescription: 相机仅用于扫描童装吊牌上的商品编码；画面不会被保存或上传。
         UIApplicationSceneManifest:
