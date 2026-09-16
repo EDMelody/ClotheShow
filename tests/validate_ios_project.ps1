@@ -76,6 +76,9 @@ foreach ($required in @(
 )) {
     if (-not $projectSpec.Contains($required)) { throw "XcodeGen 工程未正确声明打包资源：$required" }
 }
+if ($projectSpec -notmatch '(?ms)TongShang:\s+type: application.*?settings:\s+base:.*?MARKETING_VERSION: 1\.0\.1\s+CURRENT_PROJECT_VERSION: 2') {
+    throw '应用 target 未配置 1.0.1 (2) 版本号。'
+}
 $localizedInfo = Get-Content -Raw -Encoding UTF8 (Join-Path $root 'TongShang\Resources\zh-Hans.lproj\InfoPlist.strings')
 if (-not $localizedInfo.Contains('"CFBundleDisplayName" = "童裳";')) {
     throw '简体中文桌面名称本地化缺失。'
