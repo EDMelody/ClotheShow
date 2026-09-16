@@ -38,7 +38,11 @@ $scanner = Get-Content -Raw -Encoding UTF8 (Join-Path $root 'TongShang\Scanner\S
 if (-not $scanner.Contains('DataScannerViewController') -or -not $scanner.Contains('SKUResolver')) { throw '扫码模块未接入 VisionKit 或 SKU Resolver。' }
 
 $workflow = Get-Content -Raw -Encoding UTF8 (Join-Path $root '.github\workflows\ios.yml')
-foreach ($required in @('runs-on: macos-15', 'xcodegen generate', 'xcodebuild', 'CODE_SIGNING_ALLOWED=NO')) {
+foreach ($required in @(
+    'runs-on: macos-15', 'xcodegen generate', 'xcodebuild', 'CODE_SIGNING_ALLOWED=NO',
+    "-destination 'generic/platform=iOS'", 'Release-iphoneos/TongShang.app',
+    'TongShang-unsigned.ipa', 'name: TongShang-unsigned-ipa'
+)) {
     if (-not $workflow.Contains($required)) { throw "iOS 云构建工作流缺少：$required" }
 }
 
