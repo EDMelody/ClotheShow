@@ -42,15 +42,24 @@ foreach ($required in @(
     'runs-on: macos-15', 'xcodegen generate', 'xcodebuild', 'CODE_SIGNING_ALLOWED=NO',
     "-destination 'generic/platform=iOS'", 'Release-iphoneos/TongShang.app',
     'TongShang-unsigned.ipa', 'name: TongShang-unsigned-ipa', 'ipa-entries.txt',
-    'Payload/TongShang.app/products.json', 'Payload/TongShang.app/Viewer/index.html',
+    'Payload/TongShang.app/products.json', 'Payload/TongShang.app/zh-Hans.lproj/InfoPlist.strings',
+    'Payload/TongShang.app/Viewer/index.html',
     "'^Payload/TongShang.app/Models/.+\.glb`$'", "'^Payload/TongShang.app/Models/.+\.usdz`$'"
 )) {
     if (-not $workflow.Contains($required)) { throw "iOS 云构建工作流缺少：$required" }
 }
 
 $projectSpec = Get-Content -Raw -Encoding UTF8 (Join-Path $root 'project.yml')
-foreach ($required in @('buildPhase: resources', 'destination: resources', 'subpath: Viewer', 'subpath: Models')) {
+foreach ($required in @(
+    'buildPhase: resources', 'destination: resources', 'subpath: Viewer', 'subpath: Models',
+    'CFBundleDisplayName: TongShang', 'CFBundleName: TongShang',
+    'PRODUCT_BUNDLE_IDENTIFIER: com.edmelody.tongshang.viewer', 'TongShang/Resources/zh-Hans.lproj'
+)) {
     if (-not $projectSpec.Contains($required)) { throw "XcodeGen 工程未正确声明打包资源：$required" }
+}
+$localizedInfo = Get-Content -Raw -Encoding UTF8 (Join-Path $root 'TongShang\Resources\zh-Hans.lproj\InfoPlist.strings')
+if (-not $localizedInfo.Contains('"CFBundleDisplayName" = "童裳";')) {
+    throw '简体中文桌面名称本地化缺失。'
 }
 
 $launcher = Get-Content -Raw -Encoding UTF8 (Join-Path $root 'scripts\run-apple-prerequisite-installer.cmd')

@@ -18,6 +18,8 @@ targets:
           - Resources
       - path: TongShang/Resources/products.json
         buildPhase: resources
+      - path: TongShang/Resources/zh-Hans.lproj
+        buildPhase: resources
       - path: TongShang/Resources/Viewer
         buildPhase:
           copyFiles:
@@ -31,7 +33,8 @@ targets:
     info:
       path: TongShang/Info.plist
       properties:
-        CFBundleDisplayName: 童裳
+        CFBundleDisplayName: TongShang
+        CFBundleName: TongShang
         UILaunchScreen: {}
         NSCameraUsageDescription: 相机仅用于扫描童装吊牌上的商品编码；画面不会被保存或上传。
         UIApplicationSceneManifest:
@@ -40,7 +43,7 @@ targets:
           - UIInterfaceOrientationPortrait
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: com.tongshang.viewer
+        PRODUCT_BUNDLE_IDENTIFIER: com.edmelody.tongshang.viewer
         TARGETED_DEVICE_FAMILY: "1"
         ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS: YES
   TongShangTests:

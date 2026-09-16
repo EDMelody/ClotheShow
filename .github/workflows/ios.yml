@@ -64,6 +64,7 @@ jobs:
           ditto -c -k --sequesterRsrc --keepParent Payload TongShang-unsigned.ipa
           unzip -Z1 TongShang-unsigned.ipa > ipa-entries.txt
           grep -Fx 'Payload/TongShang.app/products.json' ipa-entries.txt
+          grep -Fx 'Payload/TongShang.app/zh-Hans.lproj/InfoPlist.strings' ipa-entries.txt
           grep -Fx 'Payload/TongShang.app/Viewer/index.html' ipa-entries.txt
           grep -Fx 'Payload/TongShang.app/Viewer/viewer.bundle.js' ipa-entries.txt
           test "$(grep -Ec '^Payload/TongShang.app/Models/.+\.glb$' ipa-entries.txt)" -eq 6
