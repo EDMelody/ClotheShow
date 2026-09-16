@@ -50,10 +50,13 @@ foreach ($required in @('fltmc', '-Verb RunAs', 'install-apple-prerequisites.ps1
 $appleInstaller = Get-Content -Raw -Encoding UTF8 (Join-Path $root 'scripts\install-apple-prerequisites.ps1')
 foreach ($required in @(
     'ConvertTo-MsiArgument', "-ArgumentList (`$arguments -join ' ')", 'Write-Host "Installing',
-    'AppleApplicationSupport.msi', 'AppleApplicationSupport64.msi', 'Bonjour.msi', 'Bonjour64.msi',
+    'AppleApplicationSupport.msi', 'AppleApplicationSupport64.msi', 'Bonjour64.msi',
     'PendingFileRenameOperations', 'restart Windows and run this installer again'
 )) {
     if (-not $appleInstaller.Contains($required)) { throw "Apple 安装脚本缺少安全参数处理或进度提示：$required" }
+}
+if ($appleInstaller.Contains("Join-Path `$icloudInstaller 'Bonjour.msi'")) {
+    throw 'Apple 安装脚本不应在 64 位 Windows 上运行仅适用于 32 位系统的 Bonjour.msi。'
 }
 
 Write-Output "iOS project validation passed ($($manifest.products.Count) products, $($manifest.products.Count * 2) 3D/AR assets)."

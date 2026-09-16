@@ -28,7 +28,6 @@ New-Item -ItemType Directory -Force -Path $logDirectory | Out-Null
 $packages = @(
     @{ Name = 'Apple Application Support 32-bit'; Msi = Join-Path $icloudInstaller 'AppleApplicationSupport.msi'; Properties = @("INSTALLDIR=$ICloudRoot\Apple Application Support (32-bit)") },
     @{ Name = 'Apple Application Support 64-bit'; Msi = Join-Path $icloudInstaller 'AppleApplicationSupport64.msi'; Properties = @("INSTALLDIR=$ICloudRoot\Apple Application Support (64-bit)") },
-    @{ Name = 'Bonjour 32-bit'; Msi = Join-Path $icloudInstaller 'Bonjour.msi'; Properties = @("INSTALLDIR=$ICloudRoot\Bonjour (32-bit)") },
     @{ Name = 'Bonjour 64-bit'; Msi = Join-Path $icloudInstaller 'Bonjour64.msi'; Properties = @("INSTALLDIR=$ICloudRoot\Bonjour", "INSTALLDIR64=$ICloudRoot\Bonjour") },
     @{ Name = 'Apple Software Update'; Msi = Join-Path $icloudInstaller 'AppleSoftwareUpdate.msi'; Properties = @("INSTALLDIR=$ICloudRoot\Apple Software Update") },
     @{ Name = 'Apple Mobile Device Support'; Msi = Join-Path $itunesInstaller 'AppleMobileDeviceSupport64.msi'; Properties = @("INSTALLDIR=$ITunesRoot\Mobile Device Support", "INSTALLDIR32=$ITunesRoot\Mobile Device Support (32-bit)") },
