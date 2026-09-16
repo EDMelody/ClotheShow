@@ -18,16 +18,19 @@ struct ProductDetailView: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
-                ZStack(alignment: .bottom) {
+                ZStack {
                     ThreeDViewer(product: product, color: selectedColor, autoRotate: autoRotate, state: $viewerState)
-                        .frame(height: 390)
+                        .frame(height: 320)
                         .background(Color(hex: selectedColor.hex).opacity(0.12))
                     viewerOverlay
-                    HStack {
-                        Label("拖动旋转 · 双指缩放", systemImage: "hand.draw").font(.caption)
+                    VStack {
                         Spacer()
-                        Button { autoRotate.toggle() } label: { Image(systemName: autoRotate ? "pause.fill" : "arrow.clockwise") }
-                    }.padding(12).background(.thinMaterial)
+                        HStack {
+                            Label("拖动旋转 · 双指缩放", systemImage: "hand.draw").font(.caption)
+                            Spacer()
+                            Button { autoRotate.toggle() } label: { Image(systemName: autoRotate ? "pause.fill" : "arrow.clockwise") }
+                        }.padding(12).background(.thinMaterial)
+                    }
                 }
                 VStack(alignment: .leading, spacing: 16) {
                     HStack(alignment: .firstTextBaseline) {
@@ -54,8 +57,14 @@ struct ProductDetailView: View {
                 }.padding(.horizontal)
             }
         }
-        .ignoresSafeArea(edges: .top)
+        .toolbar(.visible, for: .navigationBar)
+        .navigationBarBackButtonHidden(true)
+        .navigationTitle("")
+        .navigationBarTitleDisplayMode(.inline)
         .toolbar {
+            ToolbarItem(placement: .topBarLeading) {
+                Button { dismiss() } label: { Label("返回", systemImage: "chevron.left") }
+            }
             ToolbarItem(placement: .topBarTrailing) {
                 Button { store.toggleFavorite(product) } label: { Image(systemName: store.isFavorite(product) ? "heart.fill" : "heart") }
             }

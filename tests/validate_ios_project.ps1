@@ -33,6 +33,24 @@ foreach ($product in $manifest.products) {
 $viewerSource = Get-Content -Raw -Encoding UTF8 (Join-Path $root 'web-src\viewer.js')
 if ($viewerSource -match 'https?://') { throw '3D 查看器不应在运行时加载远程脚本或模型。' }
 if (-not $viewerSource.Contains("/^file:/i") -or -not $viewerSource.Contains('productId')) { throw '3D 查看器缺少资源与商品 ID 白名单校验。' }
+foreach ($required in @('payload.url === loadingURL', 'generation !== loadGeneration', 'disposeModel(model)', 'function frameModel(root)')) {
+    if (-not $viewerSource.Contains($required)) { throw "3D 查看器缺少稳定性保护：$required" }
+}
+if ($viewerSource.Contains('material.clone()')) { throw '3D 查看器不应在每次颜色更新时克隆材质。' }
+
+$viewerBridge = Get-Content -Raw -Encoding UTF8 (Join-Path $root 'TongShang\Viewer\ThreeDViewer.swift')
+foreach ($required in @('lastSentCommand', 'dismantleUIView', 'webViewWebContentProcessDidTerminate')) {
+    if (-not $viewerBridge.Contains($required)) { throw "iOS 3D 桥接缺少生命周期保护：$required" }
+}
+
+$homeView = Get-Content -Raw -Encoding UTF8 (Join-Path $root 'TongShang\Views\HomeView.swift')
+if (-not $homeView.Contains('.aspectRatio(1, contentMode: .fit)') -or -not $homeView.Contains('.padding(.bottom, 28)')) {
+    throw '首页商品卡片比例或底部安全间距未固定。'
+}
+$detailView = Get-Content -Raw -Encoding UTF8 (Join-Path $root 'TongShang\Views\ProductDetailView.swift')
+if ($detailView.Contains('.ignoresSafeArea(edges: .top)') -or -not $detailView.Contains('Label("返回"')) {
+    throw '详情页顶部安全区或中文返回按钮配置不正确。'
+}
 
 $scanner = Get-Content -Raw -Encoding UTF8 (Join-Path $root 'TongShang\Scanner\ScannerScreen.swift')
 if (-not $scanner.Contains('DataScannerViewController') -or -not $scanner.Contains('SKUResolver')) { throw '扫码模块未接入 VisionKit 或 SKU Resolver。' }
@@ -53,7 +71,8 @@ $projectSpec = Get-Content -Raw -Encoding UTF8 (Join-Path $root 'project.yml')
 foreach ($required in @(
     'buildPhase: resources', 'destination: resources', 'subpath: Viewer', 'subpath: Models',
     'CFBundleDisplayName: TongShang', 'CFBundleName: TongShang',
-    'PRODUCT_BUNDLE_IDENTIFIER: com.edmelody.tongshang.viewer', 'TongShang/Resources/zh-Hans.lproj'
+    'PRODUCT_BUNDLE_IDENTIFIER: com.edmelody.tongshang.viewer', 'TongShang/Resources/zh-Hans.lproj',
+    'MARKETING_VERSION: 1.0.1', 'CURRENT_PROJECT_VERSION: 2'
 )) {
     if (-not $projectSpec.Contains($required)) { throw "XcodeGen 工程未正确声明打包资源：$required" }
 }

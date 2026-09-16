@@ -11,7 +11,7 @@ struct HomeView: View {
 
     var body: some View {
         ScrollView {
-            VStack(alignment: .leading, spacing: 22) {
+            VStack(alignment: .leading, spacing: 20) {
                 VStack(alignment: .leading, spacing: 5) {
                     Text("NEW SEASON").font(.caption.bold()).tracking(2).foregroundStyle(Theme.coral)
                     Text("发现孩子的\n今日穿搭").font(.largeTitle.bold()).foregroundStyle(Theme.ink)
@@ -19,7 +19,7 @@ struct HomeView: View {
                 ScanHero { scannerPresented = true }
                 Text("精选童装").font(.title3.bold())
                 ScrollView(.horizontal, showsIndicators: false) {
-                    HStack {
+                    HStack(spacing: 8) {
                         ForEach(categories, id: \.self) { item in
                             Button(item) { category = item }
                                 .buttonStyle(.borderedProminent)
@@ -29,15 +29,22 @@ struct HomeView: View {
                         }
                     }
                 }
-                LazyVGrid(columns: [.init(.flexible()), .init(.flexible())], spacing: 18) {
+                LazyVGrid(columns: [
+                    .init(.flexible(), spacing: 12),
+                    .init(.flexible(), spacing: 12)
+                ], spacing: 18) {
                     ForEach(visibleProducts) { product in
                         NavigationLink(value: product) { ProductCard(product: product) }
                             .buttonStyle(.plain)
                     }
                 }
-            }.padding()
+            }
+            .padding(.horizontal, 16)
+            .padding(.top, 10)
+            .padding(.bottom, 28)
         }
         .background(Theme.cream.opacity(0.35))
+        .toolbar(.hidden, for: .navigationBar)
         .navigationDestination(for: Product.self) { ProductDetailView(product: $0) }
         .sheet(isPresented: $scannerPresented) {
             ScannerScreen { product in scannerPresented = false; scannedProduct = product }
@@ -49,16 +56,17 @@ struct HomeView: View {
 private struct ScanHero: View {
     let action: () -> Void
     var body: some View {
-        HStack {
+        HStack(spacing: 14) {
             VStack(alignment: .leading, spacing: 10) {
                 Text("一扫即见\n立体新装").font(.title2.bold())
                 Text("对准吊牌二维码，立即查看对应童装模型。").font(.caption).foregroundStyle(.white.opacity(0.7))
                 Button("开始扫描  →", action: action).buttonStyle(.borderedProminent).tint(.white).foregroundStyle(Theme.ink)
             }
+            .layoutPriority(1)
             Spacer()
-            Image(systemName: "tshirt.fill").font(.system(size: 74)).foregroundStyle(Color(hex: "#F2CD72"))
+            Image(systemName: "tshirt.fill").font(.system(size: 62)).foregroundStyle(Color(hex: "#F2CD72"))
         }
-        .padding(22).foregroundStyle(.white).background(Theme.ink, in: RoundedRectangle(cornerRadius: 28))
+        .padding(20).foregroundStyle(.white).background(Theme.ink, in: RoundedRectangle(cornerRadius: 26))
     }
 }
 
@@ -68,9 +76,11 @@ struct ProductCard: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 9) {
             ZStack(alignment: .topTrailing) {
-                RoundedRectangle(cornerRadius: 24).fill(Color(hex: product.primaryColor.hex).opacity(0.18)).aspectRatio(0.86, contentMode: .fit)
+                RoundedRectangle(cornerRadius: 22)
+                    .fill(Color(hex: product.primaryColor.hex).opacity(0.18))
+                    .aspectRatio(1, contentMode: .fit)
                 Image(systemName: product.category == "裤装" ? "figure.walk" : "tshirt.fill")
-                    .resizable().scaledToFit().padding(34).foregroundStyle(Color(hex: product.primaryColor.hex))
+                    .resizable().scaledToFit().padding(30).foregroundStyle(Color(hex: product.primaryColor.hex))
                 Button { store.toggleFavorite(product) } label: {
                     Image(systemName: store.isFavorite(product) ? "heart.fill" : "heart").padding(10).background(.thinMaterial, in: Circle())
                 }.padding(8).foregroundStyle(Theme.coral)

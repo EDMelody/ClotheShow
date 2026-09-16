@@ -19,3 +19,21 @@ test('favorites persist locally and camera simulation never uploads frames', asy
   assert.match(html, /localStorage\.setItem\('tongshang-favorites'/);
   assert.doesNotMatch(html, /fetch\(|XMLHttpRequest|WebSocket/);
 });
+
+test('3D viewer deduplicates loads and releases GPU resources', async () => {
+  const source = await read('web-src/viewer.js');
+  assert.match(source, /payload\.url === loadingURL/);
+  assert.match(source, /generation !== loadGeneration/);
+  assert.match(source, /disposeModel\(model\)/);
+  assert.match(source, /material\.dispose\(\)/);
+  assert.doesNotMatch(source, /material\.clone\(\)/);
+  assert.match(source, /Math\.min\(devicePixelRatio, 1\.5\)/);
+});
+
+test('3D viewer frames each garment using its measured bounds', async () => {
+  const source = await read('web-src/viewer.js');
+  assert.match(source, /function frameModel\(root\)/);
+  assert.match(source, /verticalDistance/);
+  assert.match(source, /horizontalDistance/);
+  assert.match(source, /controls\.target\.set\(0, 0, 0\)/);
+});
